@@ -1,4 +1,5 @@
 ﻿using Humanizer;
+using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,8 +9,7 @@ namespace WebApplication1.Models
 {
     public class Product
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public int ProductID { get; set;}
+        [DatabaseGenerated(DatabaseGeneratedOption.None)] public int ProductID { get; set;}
 
         public string? Name { get; set;}
 
@@ -19,9 +19,13 @@ namespace WebApplication1.Models
 
         public DateTime Date {  get; set;}  
 
-        public int CreatorId {  get; set;}
+        public string CreatorId {  get; set;}
 
         public string? ImageUrl { get; set;} 
+
+
+
+        public User User { get; set;}
 
     }
 }

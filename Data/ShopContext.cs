@@ -11,11 +11,14 @@ namespace WebApplication1.Data
         {
         }
         public DbSet<Product> Products { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<Product>().ToTable("product");
- //           modelBuilder.Entity<Category>().ToTable("category");
- //           modelBuilder.Entity<Comment>().ToTable("comment");
+            modelBuilder.Entity<Category>().ToTable("category");
+            modelBuilder.Entity<Comment>().ToTable("comment");
         }
     }
 }
