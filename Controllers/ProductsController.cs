@@ -57,6 +57,7 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductID,Name,Description,Date,ImageUrl")] Product product)
         {
+            product.Date = DateTime.Now;
             product.IsDeleted = false;
             product.CreatorID = User.Identity.Name;
             if (product.CreatorID == null)
