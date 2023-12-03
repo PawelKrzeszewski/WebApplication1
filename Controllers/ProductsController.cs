@@ -102,6 +102,7 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProductID,Name,Description,IsDeleted,Date,ImageUrl,CreatorID")] Product product)
         {
+
             if (id != product.ProductID)
             {
                 return NotFound();
