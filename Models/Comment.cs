@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Models
 {
@@ -6,9 +7,7 @@ namespace WebApplication1.Models
     {
         [DatabaseGenerated(DatabaseGeneratedOption.None)] public int CommentID { get; set; }
 
-        public string Link { get; set; }
-
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         public DateTime DateCreated { get; set; }
 
@@ -16,13 +15,13 @@ namespace WebApplication1.Models
 
         public int ProductID { get; set; }
 
-        public string CreatorId {  get; set; }
+        public string UserId {  get; set; }
 
 
 
 
         public Product Product { get; set; }
 
-        public User User {  get; set; } 
+        public IdentityUser User { get; set; }
     }
 }

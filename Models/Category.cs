@@ -8,5 +8,7 @@ namespace WebApplication1.Models
 
         public string Name { get; set; }
 
+        public Product Product { get; set; }
+
     }
 }

@@ -1,4 +1,5 @@
 ﻿using Humanizer;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Client;
 using System;
 using System.Collections.Generic;
@@ -24,8 +25,7 @@ namespace WebApplication1.Models
         public string? ImageUrl { get; set;} 
 
 
-
-        public User User { get; set;}
+        public IdentityUser User { get; set;}
 
     }
 }
