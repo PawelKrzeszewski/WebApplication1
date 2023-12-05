@@ -13,8 +13,8 @@ namespace WebApplication1.Models
 
         public bool IsDeleted { get; set; }
 
-        public Product Product { get; set; }
+        public int ProductID { get; set; }
 
-        public IdentityUser User { get; set; }  
+        public string CreatorID { get; set; }  
     }
 }

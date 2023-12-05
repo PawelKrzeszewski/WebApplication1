@@ -7,8 +7,5 @@ namespace WebApplication1.Models
         [DatabaseGenerated(DatabaseGeneratedOption.None)] public int CategoryID { get; set; }
 
         public string Name { get; set; }
-
-        public Product Product { get; set; }
-
     }
 }
