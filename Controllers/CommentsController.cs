@@ -56,13 +56,29 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CommentID,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
         {
-            if (ModelState.IsValid)
+            comment.DateCreated = DateTime.Now;
+            comment.IsDeleted = false;
+            comment.CreatorID = User.Identity.Name;
+
+            if(User.Identity.Name == null)
             {
-                _context.Add(comment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return BadRequest();
             }
-            return View(comment);
+            else
+            {
+                ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+
+                if (ModelState.IsValid)
+                {
+                    _context.Add(comment);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(comment);
+
+            }
+
+            
         }
 
         // GET: Comments/Edit/5
@@ -74,6 +90,12 @@ namespace WebApplication1.Controllers
             }
 
             var comment = await _context.Comments.FindAsync(id);
+
+            if (User.Identity.Name != comment.CreatorID)
+            {
+                return BadRequest();
+            }
+
             if (comment == null)
             {
                 return NotFound();
@@ -142,7 +164,7 @@ namespace WebApplication1.Controllers
             var comment = await _context.Comments.FindAsync(id);
             if (comment != null)
             {
-                _context.Comments.Remove(comment);
+                comment.IsDeleted = true;
             }
 
             await _context.SaveChangesAsync();
