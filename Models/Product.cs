@@ -20,12 +20,12 @@ namespace WebApplication1.Models
 
         public DateTime Date {  get; set;}  
 
-        public string CreatorId {  get; set;}
-
         public string? ImageUrl { get; set;} 
 
+        public string CreatorID { get; set;}
 
-        public IdentityUser User { get; set;}
+        public int CategoryID {  get; set;}
 
+        
     }
 }
