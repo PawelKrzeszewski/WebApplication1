@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -11,22 +10,22 @@ using WebApplication1.Models;
 
 namespace WebApplication1.Controllers
 {
-    public class ProductsController : Controller
+    public class CommentsController : Controller
     {
         private readonly ShopContext _context;
 
-        public ProductsController(ShopContext context)
+        public CommentsController(ShopContext context)
         {
             _context = context;
         }
 
-        // GET: Products
+        // GET: Comments
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.ToListAsync());
+            return View(await _context.Comments.ToListAsync());
         }
 
-        // GET: Products/Details/5
+        // GET: Comments/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,53 +33,39 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.ProductID == id);
-            if (product == null)
+            var comment = await _context.Comments
+                .FirstOrDefaultAsync(m => m.CommentID == id);
+            if (comment == null)
             {
                 return NotFound();
             }
 
-            return View(product);
+            return View(comment);
         }
 
-        // GET: Products/Create
+        // GET: Comments/Create
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: Products/Create
+        // POST: Comments/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductID,Name,Description,Date,ImageUrl,CreatorID,CategoryID")] Product product)
+        public async Task<IActionResult> Create([Bind("CommentID,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
         {
-            product.Date = DateTime.Now;
-            product.IsDeleted = false;
-            product.CreatorID = User.Identity.Name;
-            if (product.CreatorID == null)
+            if (ModelState.IsValid)
             {
-                return View(product);
+                _context.Add(comment);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
-
-
-                if (ModelState.IsValid)
-                {
-                    _context.Add(product);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(product);
-            }
-            
+            return View(comment);
         }
 
-        // GET: Products/Edit/5
+        // GET: Comments/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -88,42 +73,36 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null)
+            var comment = await _context.Comments.FindAsync(id);
+            if (comment == null)
             {
                 return NotFound();
             }
-            return View(product);
+            return View(comment);
         }
 
-        // POST: Products/Edit/5
+        // POST: Comments/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductID,Name,Description,IsDeleted,Date,ImageUrl,CreatorID,CategoryID")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("CommentID,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
         {
-
-            if (id != product.ProductID)
+            if (id != comment.CommentID)
             {
                 return NotFound();
-            }
-
-            if (User.Identity.Name !=  product.CreatorID)
-            {
-                return Unauthorized();
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(product);
+                    _context.Update(comment);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.ProductID))
+                    if (!CommentExists(comment.CommentID))
                     {
                         return NotFound();
                     }
@@ -134,10 +113,10 @@ namespace WebApplication1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(comment);
         }
 
-        // GET: Products/Delete/5
+        // GET: Comments/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -145,34 +124,34 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Products
-                .FirstOrDefaultAsync(m => m.ProductID == id);
-            if (product == null)
+            var comment = await _context.Comments
+                .FirstOrDefaultAsync(m => m.CommentID == id);
+            if (comment == null)
             {
                 return NotFound();
             }
 
-            return View(product);
+            return View(comment);
         }
 
-        // POST: Products/Delete/5
+        // POST: Comments/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Products.FindAsync(id);
-            if (product != null)
+            var comment = await _context.Comments.FindAsync(id);
+            if (comment != null)
             {
-                product.IsDeleted = true;
+                _context.Comments.Remove(comment);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
+        private bool CommentExists(int id)
         {
-            return _context.Products.Any(e => e.ProductID == id);
+            return _context.Comments.Any(e => e.CommentID == id);
         }
     }
 }
