@@ -57,6 +57,11 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductID,Name,Description,Date,ImageUrl,CreatorID,CategoryID")] Product product)
         {
+/*            _context.Products.OrderByDescendingroducts.ProductID)  ;
+            product.ProductID = _context.Products.First().ProductID;
+            product.ProductID = product.ProductID + 1;
+*/
+            product.ProductID = _context.Products.OrderBy(m => m.ProductID).Last().ProductID+1;
             product.Date = DateTime.Now;
             product.IsDeleted = false;
             product.CreatorID = User.Identity.Name;
@@ -67,6 +72,7 @@ namespace WebApplication1.Controllers
             else
             {
                 ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                ModelState["ProductID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
 
 
                 if (ModelState.IsValid)
