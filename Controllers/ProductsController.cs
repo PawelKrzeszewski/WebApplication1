@@ -111,7 +111,7 @@ namespace WebApplication1.Controllers
 
             if (User.Identity.Name !=  product.CreatorID)
             {
-                return Unauthorized();
+                return Redirect("/Identity/Account/Manage");
             }
 
             if (ModelState.IsValid)
