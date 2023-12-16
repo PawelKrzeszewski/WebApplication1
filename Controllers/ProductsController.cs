@@ -2,13 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models;
-
 
 namespace WebApplication1.Controllers
 {
@@ -24,7 +22,8 @@ namespace WebApplication1.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.ToListAsync());
+            var shopContext = _context.Products.Include(p => p.Category);
+            return View(await shopContext.ToListAsync());
         }
 
         // GET: Products/Details/5
@@ -36,6 +35,7 @@ namespace WebApplication1.Controllers
             }
 
             var product = await _context.Products
+                .Include(p => p.Category)
                 .FirstOrDefaultAsync(m => m.ProductID == id);
             if (product == null)
             {
@@ -48,6 +48,7 @@ namespace WebApplication1.Controllers
         // GET: Products/Create
         public IActionResult Create()
         {
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID");
             return View();
         }
 
@@ -56,33 +57,16 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductID,Name,Description,Date,ImageUrl,CreatorID,CategoryID")] Product product)
+        public async Task<IActionResult> Create([Bind("ProductID,Name,Description,IsDeleted,Date,ImageUrl,CreatorID,CategoryID")] Product product)
         {
-            product.ProductID = _context.Products.OrderBy(m => m.ProductID).Last().ProductID+1;
-            product.Date = DateTime.Now;
-            product.IsDeleted = false;
-            product.CreatorID = User.Identity.Name;
-            product.ProductID = _context.Products.OrderBy(m => m.ProductID).Last().ProductID + 1;
-
-            if (product.CreatorID == null)
+            if (ModelState.IsValid)
             {
-                return View(product);
+                _context.Add(product);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
-                ModelState["ProductID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
-
-
-                if (ModelState.IsValid)
-                {
-                    _context.Add(product);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(product);
-            }
-            
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
+            return View(product);
         }
 
         // GET: Products/Edit/5
@@ -98,6 +82,7 @@ namespace WebApplication1.Controllers
             {
                 return NotFound();
             }
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
             return View(product);
         }
 
@@ -108,15 +93,9 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("ProductID,Name,Description,IsDeleted,Date,ImageUrl,CreatorID,CategoryID")] Product product)
         {
-
             if (id != product.ProductID)
             {
                 return NotFound();
-            }
-
-            if (User.Identity.Name !=  product.CreatorID)
-            {
-                return Redirect("/Identity/Account/Manage");
             }
 
             if (ModelState.IsValid)
@@ -139,6 +118,7 @@ namespace WebApplication1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
             return View(product);
         }
 
@@ -151,6 +131,7 @@ namespace WebApplication1.Controllers
             }
 
             var product = await _context.Products
+                .Include(p => p.Category)
                 .FirstOrDefaultAsync(m => m.ProductID == id);
             if (product == null)
             {
@@ -168,7 +149,7 @@ namespace WebApplication1.Controllers
             var product = await _context.Products.FindAsync(id);
             if (product != null)
             {
-                product.IsDeleted = true;
+                _context.Products.Remove(product);
             }
 
             await _context.SaveChangesAsync();

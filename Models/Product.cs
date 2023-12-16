@@ -25,6 +25,9 @@ namespace WebApplication1.Models
         public string CreatorID { get; set;}
 
         public int CategoryID {  get; set;}
+        public Category Category { get; set;}
+
+        public ICollection<Comment> Comments { get; set;}
 
         
     }

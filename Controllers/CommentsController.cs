@@ -22,7 +22,8 @@ namespace WebApplication1.Controllers
         // GET: Comments
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Comments.ToListAsync());
+            var shopContext = _context.Comments.Include(c => c.Product);
+            return View(await shopContext.ToListAsync());
         }
 
         // GET: Comments/Details/5
@@ -34,6 +35,7 @@ namespace WebApplication1.Controllers
             }
 
             var comment = await _context.Comments
+                .Include(c => c.Product)
                 .FirstOrDefaultAsync(m => m.CommentID == id);
             if (comment == null)
             {
@@ -46,6 +48,7 @@ namespace WebApplication1.Controllers
         // GET: Comments/Create
         public IActionResult Create()
         {
+            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID");
             return View();
         }
 
@@ -56,29 +59,14 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CommentID,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
         {
-            comment.DateCreated = DateTime.Now;
-            comment.IsDeleted = false;
-            comment.CreatorID = User.Identity.Name;
-
-            if(User.Identity.Name == null)
+            if (ModelState.IsValid)
             {
-                return BadRequest();
+                _context.Add(comment);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-            else
-            {
-                ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
-
-                if (ModelState.IsValid)
-                {
-                    _context.Add(comment);
-                    await _context.SaveChangesAsync();
-                    return RedirectToAction(nameof(Index));
-                }
-                return View(comment);
-
-            }
-
-            
+            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID", comment.ProductID);
+            return View(comment);
         }
 
         // GET: Comments/Edit/5
@@ -90,16 +78,11 @@ namespace WebApplication1.Controllers
             }
 
             var comment = await _context.Comments.FindAsync(id);
-
-            if (User.Identity.Name != comment.CreatorID)
-            {
-                return BadRequest();
-            }
-
             if (comment == null)
             {
                 return NotFound();
             }
+            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID", comment.ProductID);
             return View(comment);
         }
 
@@ -135,6 +118,7 @@ namespace WebApplication1.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID", comment.ProductID);
             return View(comment);
         }
 
@@ -147,6 +131,7 @@ namespace WebApplication1.Controllers
             }
 
             var comment = await _context.Comments
+                .Include(c => c.Product)
                 .FirstOrDefaultAsync(m => m.CommentID == id);
             if (comment == null)
             {
@@ -164,7 +149,7 @@ namespace WebApplication1.Controllers
             var comment = await _context.Comments.FindAsync(id);
             if (comment != null)
             {
-                comment.IsDeleted = true;
+                _context.Comments.Remove(comment);
             }
 
             await _context.SaveChangesAsync();

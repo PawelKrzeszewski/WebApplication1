@@ -14,6 +14,7 @@ namespace WebApplication1.Models
         public bool IsDeleted { get; set; }
 
         public int ProductID { get; set; }
+        public Product Product { get; set; }
 
         public string CreatorID { get; set; }  
     }
