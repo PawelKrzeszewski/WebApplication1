@@ -9,6 +9,7 @@ using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models;
 
+
 namespace WebApplication1.Controllers
 {
     public class ProductsController : Controller
@@ -61,6 +62,8 @@ namespace WebApplication1.Controllers
             product.Date = DateTime.Now;
             product.IsDeleted = false;
             product.CreatorID = User.Identity.Name;
+            product.ProductID = _context.Products.OrderBy(m => m.ProductID).Last().ProductID + 1;
+
             if (product.CreatorID == null)
             {
                 return View(product);
