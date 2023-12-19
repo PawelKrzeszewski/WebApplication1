@@ -59,14 +59,29 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ProductID,Name,Description,IsDeleted,Date,ImageUrl,CreatorID,CategoryID")] Product product)
         {
-            if (ModelState.IsValid)
+            product.ProductID = _context.Products.OrderBy(m => m.ProductID).Last().ProductID + 1;
+            product.Date = DateTime.Now;
+            product.IsDeleted = false;
+            product.CreatorID = User.Identity.Name;
+            if (product.CreatorID == null)
             {
-                _context.Add(product);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(product);
             }
-            ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
-            return View(product);
+            else
+            {
+                ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                ModelState["ProductID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                ModelState["Date"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                if (ModelState.IsValid)
+                {
+                    _context.Add(product);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
+                return View(product);
+            }
+            
         }
 
         // GET: Products/Edit/5

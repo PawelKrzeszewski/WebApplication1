@@ -10,7 +10,7 @@ namespace WebApplication1.Models
 
         public bool IsDeleted { get; set; }
 
-        public ICollection<Product> Products { get; set; }
+        public ICollection<Product>? Products { get; set; }
 
 
     }
