@@ -113,6 +113,11 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
+            if (User.Identity.Name != product.CreatorID)
+            {
+                return Redirect("/Identity/Account/Manage");
+            }
+
             if (ModelState.IsValid)
             {
                 try
