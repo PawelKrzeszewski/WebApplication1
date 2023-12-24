@@ -59,6 +59,10 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CommentID,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
         {
+            comment.CommentID = _context.Comments.OrderBy(m => m.CommentID).Last().CommentID + 1;
+            comment.DateCreated = DateTime.Now;
+            comment.CreatorID = User.Identity.Name;
+
             if (ModelState.IsValid)
             {
                 _context.Add(comment);
