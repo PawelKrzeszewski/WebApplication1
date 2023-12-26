@@ -63,14 +63,24 @@ namespace WebApplication1.Controllers
             comment.DateCreated = DateTime.Now;
             comment.CreatorID = User.Identity.Name;
 
-            if (ModelState.IsValid)
+            if (comment.CreatorID == null)
             {
-                _context.Add(comment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(comment);
             }
-            ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID", comment.ProductID);
-            return View(comment);
+            else
+            {
+                ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                ModelState["CommentID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                ModelState["DateCreated"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                if (ModelState.IsValid)
+                {
+                    _context.Add(comment);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID", comment.ProductID);
+                return View(comment);
+            }
         }
 
         // GET: Comments/Edit/5
@@ -153,7 +163,7 @@ namespace WebApplication1.Controllers
             var comment = await _context.Comments.FindAsync(id);
             if (comment != null)
             {
-                _context.Comments.Remove(comment);
+                comment.IsDeleted = true;
             }
 
             await _context.SaveChangesAsync();
