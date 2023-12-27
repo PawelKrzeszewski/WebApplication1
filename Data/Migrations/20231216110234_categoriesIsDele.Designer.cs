@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data;
 namespace WebApplication1.Data.Migrations
 {
     [DbContext(typeof(ShopContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231216110234_categoriesIsDele")]
+    partial class categoriesIsDele
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,8 +267,6 @@ namespace WebApplication1.Data.Migrations
 
                     b.HasKey("CommentID");
 
-                    b.HasIndex("ProductID");
-
                     b.ToTable("Comments");
                 });
 
@@ -297,8 +298,6 @@ namespace WebApplication1.Data.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("ProductID");
-
-                    b.HasIndex("CategoryID");
 
                     b.ToTable("Products");
                 });
@@ -352,38 +351,6 @@ namespace WebApplication1.Data.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("WebApplication1.Models.Comment", b =>
-                {
-                    b.HasOne("WebApplication1.Models.Product", "Product")
-                        .WithMany("Comments")
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("WebApplication1.Models.Product", b =>
-                {
-                    b.HasOne("WebApplication1.Models.Category", "Category")
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
-            modelBuilder.Entity("WebApplication1.Models.Category", b =>
-                {
-                    b.Navigation("Products");
-                });
-
-            modelBuilder.Entity("WebApplication1.Models.Product", b =>
-                {
-                    b.Navigation("Comments");
                 });
 #pragma warning restore 612, 618
         }

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WebApplication1.Data;
 
@@ -11,9 +12,11 @@ using WebApplication1.Data;
 namespace WebApplication1.Data.Migrations
 {
     [DbContext(typeof(ShopContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231216111556_ReltionsBetween")]
+    partial class ReltionsBetween
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -259,12 +262,7 @@ namespace WebApplication1.Data.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<int>("ProductID")
-                        .HasColumnType("int");
-
                     b.HasKey("CommentID");
-
-                    b.HasIndex("ProductID");
 
                     b.ToTable("Comments");
                 });
@@ -275,6 +273,9 @@ namespace WebApplication1.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("CategoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CommentID")
                         .HasColumnType("int");
 
                     b.Property<string>("CreatorID")
@@ -299,6 +300,8 @@ namespace WebApplication1.Data.Migrations
                     b.HasKey("ProductID");
 
                     b.HasIndex("CategoryID");
+
+                    b.HasIndex("CommentID");
 
                     b.ToTable("Products");
                 });
@@ -354,17 +357,6 @@ namespace WebApplication1.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("WebApplication1.Models.Comment", b =>
-                {
-                    b.HasOne("WebApplication1.Models.Product", "Product")
-                        .WithMany("Comments")
-                        .HasForeignKey("ProductID")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Product");
-                });
-
             modelBuilder.Entity("WebApplication1.Models.Product", b =>
                 {
                     b.HasOne("WebApplication1.Models.Category", "Category")
@@ -373,7 +365,15 @@ namespace WebApplication1.Data.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("WebApplication1.Models.Comment", "Comment")
+                        .WithMany("Products")
+                        .HasForeignKey("CommentID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Category");
+
+                    b.Navigation("Comment");
                 });
 
             modelBuilder.Entity("WebApplication1.Models.Category", b =>
@@ -381,9 +381,9 @@ namespace WebApplication1.Data.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("WebApplication1.Models.Product", b =>
+            modelBuilder.Entity("WebApplication1.Models.Comment", b =>
                 {
-                    b.Navigation("Comments");
+                    b.Navigation("Products");
                 });
 #pragma warning restore 612, 618
         }

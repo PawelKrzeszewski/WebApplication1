@@ -20,6 +20,12 @@
     </thead>
     <tbody>
 @foreach (var item in Model) {
+            if (item.IsDeleted)
+            {
+
+            }
+            else
+            {
         <tr>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)
@@ -30,6 +36,7 @@
                 <a asp-action="Delete" asp-route-id="@item.CategoryID">Delete</a>
             </td>
         </tr>
+            }
 }
     </tbody>
 </table>

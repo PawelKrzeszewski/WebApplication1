@@ -54,15 +54,24 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CategoryID,Name")] Category category)
+        public async Task<IActionResult> Create([Bind("CategoryID,Name,IsDeleted")] Category category)
         {
-            if (ModelState.IsValid)
+            category.CategoryID = _context.Categories.OrderBy(m => m.CategoryID).Last().CategoryID + 1;
+            if (User.Identity.Name == null)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(category);
             }
-            return View(category);
+            else
+            {
+                ModelState["CategoryID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                if (ModelState.IsValid)
+                {
+                    _context.Add(category);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(category);
+            }
         }
 
         // GET: Categories/Edit/5
@@ -86,7 +95,7 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CategoryID,Name")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("CategoryID,Name,IsDeleted")] Category category)
         {
             if (id != category.CategoryID)
             {
@@ -142,7 +151,7 @@ namespace WebApplication1.Controllers
             var category = await _context.Categories.FindAsync(id);
             if (category != null)
             {
-                _context.Categories.Remove(category);
+                category.IsDeleted = true;
             }
 
             await _context.SaveChangesAsync();
