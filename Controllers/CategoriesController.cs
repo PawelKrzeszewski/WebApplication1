@@ -56,6 +56,8 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryID,Name,IsDeleted")] Category category)
         {
+            category.CategoryID = _context.Products.OrderBy(m => m.CategoryID).Last().CategoryID + 1;
+
             if (ModelState.IsValid)
             {
                 _context.Add(category);
