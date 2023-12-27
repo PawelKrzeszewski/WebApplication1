@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models;
@@ -20,10 +21,42 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString)
         {
-            var shopContext = _context.Products.Include(p => p.Category);
-            return View(await shopContext.ToListAsync());
+
+ //           return View(await shopContext.ToListAsync());
+
+            ViewBag.NameSortParm = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewBag.DateSortParm = sortOrder == "Date" ? "date_desc" : "Date";
+            var products = from p in _context.Products
+                           select p;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(s => s.Name.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    products = products.OrderByDescending(p => p.Name);
+                    products = products.Include(p => p.Category);
+                    break;
+                case "Date":
+                    products = products.OrderBy(p => p.Date);
+                    products = products.Include(p => p.Category);
+                    break;
+                case "date_desc":
+                    products = products.OrderByDescending(p => p.Date);
+                    products = products.Include(p => p.Category);
+                    break;
+                default:
+                    products = products.OrderBy(p => p.Name);
+                    products = products.Include(p => p.Category);
+                    break;
+            }
+            
+            return View(products.ToList());
         }
 
         // GET: Products/Details/5
