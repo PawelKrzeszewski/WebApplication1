@@ -56,15 +56,22 @@ namespace WebApplication1.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("CategoryID,Name,IsDeleted")] Category category)
         {
-            category.CategoryID = _context.Products.OrderBy(m => m.CategoryID).Last().CategoryID + 1;
-
-            if (ModelState.IsValid)
+            category.CategoryID = _context.Categories.OrderBy(m => m.CategoryID).Last().CategoryID + 1;
+            if (User.Identity.Name == null)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                return View(category);
             }
-            return View(category);
+            else
+            {
+                ModelState["CategoryID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
+                if (ModelState.IsValid)
+                {
+                    _context.Add(category);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+                return View(category);
+            }
         }
 
         // GET: Categories/Edit/5
