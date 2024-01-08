@@ -21,20 +21,21 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int currentCategory, int searchCategory, int? pageNumber)
         {
 
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
 
-            if (searchString != null)
+            if (searchString != null || searchCategory != 0)
             {
                 pageNumber = 1;
             }
             else
             {
                 searchString = currentFilter;
+                searchCategory = currentCategory;
             }
 
             var products = from p in _context.Products
@@ -43,6 +44,11 @@ namespace WebApplication1.Controllers
             if (!String.IsNullOrEmpty(searchString))
             {
                 products = products.Where(s => s.Name.Contains(searchString));
+            }
+
+            if (searchCategory != 0)
+            {
+                products = products.Where(s => s.CategoryID.Equals(searchCategory));
             }
 
             switch (sortOrder)
