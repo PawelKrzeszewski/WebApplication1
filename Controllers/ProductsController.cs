@@ -21,21 +21,23 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int currentCategory, int searchCategory, int? pageNumber)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
 
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
 
-            if (searchString != null || searchCategory != 0)
+            var categories = _context.Categories.ToList();
+            ViewData["Categories"] = new SelectList(categories, "CategoryID");
+
+            if (searchString != null)
             {
                 pageNumber = 1;
             }
             else
             {
                 searchString = currentFilter;
-                searchCategory = currentCategory;
             }
 
             var products = from p in _context.Products
@@ -46,32 +48,26 @@ namespace WebApplication1.Controllers
                 products = products.Where(s => s.Name.Contains(searchString));
             }
 
-            if (searchCategory != 0)
-            {
-                products = products.Where(s => s.CategoryID.Equals(searchCategory));
-            }
-
             switch (sortOrder)
             {
                 case "name_desc":
-                    products = products.OrderByDescending(p => p.Name);
+                    products = products.OrderByDescending(p => p.Name).ThenBy(p => p.Date);
                     products = products.Include(p => p.Category);
                     break;
                 case "Date":
-                    products = products.OrderBy(p => p.Date);
+                    products = products.OrderBy(p => p.Date).ThenBy(p => p.Name);
                     products = products.Include(p => p.Category);
                     break;
                 case "date_desc":
-                    products = products.OrderByDescending(p => p.Date);
+                    products = products.OrderByDescending(p => p.Date).ThenBy(p => p.Name);
                     products = products.Include(p => p.Category);
                     break;
                 default:
-                    products = products.OrderBy(p => p.Name);
+                    products = products.OrderBy(p => p.Name).ThenBy(p => p.Date);
                     products = products.Include(p => p.Category);
                     break;
             }
 
-            
             int pageSize = 5;
             return View(await PaginatedList<Product>.CreateAsync(products.AsNoTracking(), pageNumber ?? 1, pageSize));
         }

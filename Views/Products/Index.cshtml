@@ -9,23 +9,19 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-@using (Html.BeginForm())
-{
-    <p>
-        Find by name: @Html.TextBox("searchString")
+
+<p>
+    @using (Html.BeginForm("Index", "ProductsController", FormMethod.Get))
+    {
+        <label>Category:</label>
+        @Html.DropDownList("searchCategory", ViewData["Categories"] as SelectList, "All", new { onchange = "this.form.submit();" })
+
+        <label>Search:</label>
+        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" />
         <input type="submit" value="Search" />
-    </p>
-
-    
-}
-
-@using (Html.BeginForm())
-{
-    <p>
-        Find by name: @Html.TextBox("searchCategory")
-        <select asp-for="CategoryID" class="form-control" asp-items="ViewBag.CategoryID"></select>
-    </p>
-}
+    }
+</p>
+ 
 <table class="table">
     <thead>
         <tr>
