@@ -21,17 +21,15 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? searchCategory, int? pageNumber)
         {
 
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
             ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            ViewData["searchCategory"] = new SelectList(_context.Categories, "CategoryID", "CategoryID");
 
-            var categories = _context.Categories.ToList();
-            ViewData["Categories"] = new SelectList(categories, "CategoryID");
-
-            if (searchString != null)
+            if (searchString != null || searchCategory.HasValue)
             {
                 pageNumber = 1;
             }
@@ -40,31 +38,35 @@ namespace WebApplication1.Controllers
                 searchString = currentFilter;
             }
 
-            var products = from p in _context.Products
+            var products = from p in _context.Products.Include(p => p.Category)
                            select p;
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!String.IsNullOrEmpty(searchString) && searchCategory.HasValue)
             {
-                products = products.Where(s => s.Name.Contains(searchString));
+                products = products.Where(p => p.Name.Contains(searchString) && p.CategoryID == searchCategory);
+            }
+            else if (!String.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(p => p.Name.Contains(searchString));
+            }
+            else if (searchCategory.HasValue)
+            {
+                products = products.Where(p => p.CategoryID == searchCategory);
             }
 
             switch (sortOrder)
             {
                 case "name_desc":
                     products = products.OrderByDescending(p => p.Name).ThenBy(p => p.Date);
-                    products = products.Include(p => p.Category);
                     break;
                 case "Date":
                     products = products.OrderBy(p => p.Date).ThenBy(p => p.Name);
-                    products = products.Include(p => p.Category);
                     break;
                 case "date_desc":
                     products = products.OrderByDescending(p => p.Date).ThenBy(p => p.Name);
-                    products = products.Include(p => p.Category);
                     break;
                 default:
                     products = products.OrderBy(p => p.Name).ThenBy(p => p.Date);
-                    products = products.Include(p => p.Category);
                     break;
             }
 

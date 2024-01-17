@@ -11,7 +11,7 @@
 </p>
 
 <p>
-    @using (Html.BeginForm("Index", "ProductsController", FormMethod.Get))
+    @using (Html.BeginForm("Index", "Products", FormMethod.Get))
     {
         <label>Category:</label>
         @Html.DropDownList("searchCategory", ViewData["Categories"] as SelectList, "All", new { onchange = "this.form.submit();" })
