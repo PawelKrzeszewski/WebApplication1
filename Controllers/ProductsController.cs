@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using WebApplication1.Data;
 using WebApplication1.Models;
@@ -20,10 +21,57 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Products
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? searchCategory, int? pageNumber)
         {
-            var shopContext = _context.Products.Include(p => p.Category);
-            return View(await shopContext.ToListAsync());
+
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+            ViewData["searchCategory"] = new SelectList(_context.Categories, "CategoryID", "CategoryID");
+
+            if (searchString != null || searchCategory.HasValue)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            var products = from p in _context.Products.Include(p => p.Category)
+                           select p;
+
+            if (!String.IsNullOrEmpty(searchString) && searchCategory.HasValue)
+            {
+                products = products.Where(p => p.Name.Contains(searchString) && p.CategoryID == searchCategory);
+            }
+            else if (!String.IsNullOrEmpty(searchString))
+            {
+                products = products.Where(p => p.Name.Contains(searchString));
+            }
+            else if (searchCategory.HasValue)
+            {
+                products = products.Where(p => p.CategoryID == searchCategory);
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    products = products.OrderByDescending(p => p.Name).ThenBy(p => p.Date);
+                    break;
+                case "Date":
+                    products = products.OrderBy(p => p.Date).ThenBy(p => p.Name);
+                    break;
+                case "date_desc":
+                    products = products.OrderByDescending(p => p.Date).ThenBy(p => p.Name);
+                    break;
+                default:
+                    products = products.OrderBy(p => p.Name).ThenBy(p => p.Date);
+                    break;
+            }
+
+            int pageSize = 5;
+            return View(await PaginatedList<Product>.CreateAsync(products.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: Products/Details/5

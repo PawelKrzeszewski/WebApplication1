@@ -20,9 +20,42 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Categories
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
-            return View(await _context.Categories.ToListAsync());
+
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            var categories = from c in _context.Categories
+                           select c;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                categories = categories.Where(s => s.Name.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    categories = categories.OrderByDescending(c => c.Name);
+                    break;
+                default:
+                    categories = categories.OrderBy(p => p.Name);
+                    break;
+            }
+
+
+            int pageSize = 5;
+            return View(await PaginatedList<Category>.CreateAsync(categories.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: Categories/Details/5

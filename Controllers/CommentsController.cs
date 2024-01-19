@@ -20,10 +20,44 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Comments
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string currentFilter, string searchString, int? pageNumber)
         {
-            var shopContext = _context.Comments.Include(c => c.Product);
-            return View(await shopContext.ToListAsync());
+
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["DateSortParm"] = sortOrder == "Date" ? "date_desc" : "Date";
+
+            if (searchString != null)
+            {
+                pageNumber = 1;
+            }
+            else
+            {
+                searchString = currentFilter;
+            }
+
+            var comments = from c in _context.Comments
+                           select c;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                comments = comments.Where(s => s.Description.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "date_desc":
+                    comments = comments.OrderByDescending(c => c.DateCreated);
+                    comments = comments.Include(c => c.Product);
+                    break;
+                default:
+                    comments = comments.OrderBy(c => c.DateCreated);
+                    comments = comments.Include(c => c.Product);
+                    break;
+            }
+
+
+            int pageSize = 5;
+            return View(await PaginatedList<Comment>.CreateAsync(comments.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: Comments/Details/5
