@@ -140,10 +140,16 @@ namespace WebApplication1.Controllers
                 return NotFound();
             }
 
+            
+
             var product = await _context.Products.FindAsync(id);
             if (product == null)
             {
                 return NotFound();
+            }
+            if (User.Identity.Name != product.CreatorID)
+            {
+                return Redirect("/Identity/Account/AccessDenied");
             }
             ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
             return View(product);
@@ -159,11 +165,6 @@ namespace WebApplication1.Controllers
             if (id != product.ProductID)
             {
                 return NotFound();
-            }
-
-            if (User.Identity.Name != product.CreatorID)
-            {
-                return Redirect("/Identity/Account/Manage");
             }
 
             if (ModelState.IsValid)
