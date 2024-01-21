@@ -57,6 +57,11 @@ using (var scope = app.Services.CreateScope())
         var user = await userManager.FindByNameAsync("admin@admin.pl");
         await userManager.AddToRoleAsync(user, "Admin");
     }
+    if (!await roleManager.RoleExistsAsync("User"))
+    {
+        var role = new IdentityRole("User");
+        await roleManager.CreateAsync(role);
+    }
 }
 
 

@@ -21,9 +21,10 @@ namespace WebApplication1.Controllers
             var users = _userManager.Users.ToList();
             return View(users);
         }
-        public IActionResult Edit(string userId)
+
+        public IActionResult Edit(string id)
         {
-            var user = _userManager.FindByIdAsync(userId).Result;
+            var user = _userManager.FindByIdAsync(id).Result;
 
             if (user == null)
             {
@@ -31,12 +32,14 @@ namespace WebApplication1.Controllers
             }
 
             var availableRoles = _roleManager.Roles.Select(role => role.Name).ToList();
-            var userRoles = _userManager.GetRolesAsync(user).Result.ToList();
+            //var userRoles = _userManager.GetRolesAsync(user).Result.ToList();
 
             ViewBag.AvailableRoles = availableRoles;
+            //ViewBag.UserRoles = userRoles;
 
             return View(user);
         }
+
 
 
         [HttpPost]

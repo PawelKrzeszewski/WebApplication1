@@ -1,22 +1,48 @@
 ﻿@model List<Microsoft.AspNetCore.Identity.IdentityUser>
+@inject Microsoft.AspNetCore.Identity.UserManager<Microsoft.AspNetCore.Identity.IdentityUser> _userManager
 
-<table>
+<table class="table">
     <thead>
         <tr>
-            <th>Id</th>
-            <th>UserName</th>
-            <th>Email</th>
+            <th>
+                Id
+            </th>
+            <th>
+                UserName
+            </th>
+            <th>
+                Email
+            </th>
+            <th>
+                Role
+            </th>
+            <th></th>
         </tr>
     </thead>
     <tbody>
         @foreach (var user in Model)
         {
+            var userRoles = _userManager.GetRolesAsync(user).Result;
+
             <tr>
-                <td>@user.Id</td>
-                <td>@user.UserName</td>
-                <td>@user.Email</td>
+                <td>
+                    @user.Id
+                </td>
+                <td>
+                    @user.UserName
+                </td>
+                <td>
+                    @user.Email
+                </td>
+                <td>
+                    @{
+                        <text>@string.Join(", ", userRoles)</text>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@user.Id">Edit</a>
+                </td>
             </tr>
-            <a asp-action="Edit" asp-route-id="@user.Id">Edit</a>
         }
     </tbody>
 </table>
