@@ -14,6 +14,12 @@
                 Email
             </th>
             <th>
+                Phone number
+            </th>
+            <th>
+                Failed logins
+            </th>
+            <th>
                 Role
             </th>
             <th></th>
@@ -33,6 +39,12 @@
                 </td>
                 <td>
                     @user.Email
+                </td>
+                <td>
+                    @user.PhoneNumber
+                </td>
+                <td>
+                    @user.AccessFailedCount
                 </td>
                 <td>
                     @{

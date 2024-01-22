@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
@@ -84,7 +86,7 @@ namespace WebApplication1.Controllers
 
             var product = await _context.Products
                 .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.ProductID == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -94,6 +96,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Products/Create
+        [Authorize]
         public IActionResult Create()
         {
             ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID");
@@ -105,9 +108,8 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductID,Name,Description,IsDeleted,Date,ImageUrl,CreatorID,CategoryID")] Product product)
+        public async Task<IActionResult> Create([Bind("Id,Name,Description,IsDeleted,Date,ImageUrl,CreatorID,CategoryID")] Product product)
         {
-            product.ProductID = _context.Products.OrderBy(m => m.ProductID).Last().ProductID + 1;
             product.Date = DateTime.Now;
             product.IsDeleted = false;
             product.CreatorID = User.Identity.Name;
@@ -118,7 +120,6 @@ namespace WebApplication1.Controllers
             else
             {
                 ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
-                ModelState["ProductID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
                 ModelState["Date"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
                 if (ModelState.IsValid)
                 {
@@ -133,6 +134,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Products/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -147,10 +149,10 @@ namespace WebApplication1.Controllers
             {
                 return NotFound();
             }
-            if (User.Identity.Name != product.CreatorID)
+/*            if (User.Identity.Name != product.CreatorID)
             {
                 return Redirect("/Identity/Account/AccessDenied");
-            }
+            }*/
             ViewData["CategoryID"] = new SelectList(_context.Categories, "CategoryID", "CategoryID", product.CategoryID);
             return View(product);
         }
@@ -160,9 +162,9 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductID,Name,Description,IsDeleted,Date,ImageUrl,CreatorID,CategoryID")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IsDeleted,Date,ImageUrl,CreatorID,CategoryID")] Product product)
         {
-            if (id != product.ProductID)
+            if (id != product.Id)
             {
                 return NotFound();
             }
@@ -176,7 +178,7 @@ namespace WebApplication1.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.ProductID))
+                    if (!ProductExists(product.Id))
                     {
                         return NotFound();
                     }
@@ -192,6 +194,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Products/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -201,7 +204,7 @@ namespace WebApplication1.Controllers
 
             var product = await _context.Products
                 .Include(p => p.Category)
-                .FirstOrDefaultAsync(m => m.ProductID == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (product == null)
             {
                 return NotFound();
@@ -227,7 +230,7 @@ namespace WebApplication1.Controllers
 
         private bool ProductExists(int id)
         {
-            return _context.Products.Any(e => e.ProductID == id);
+            return _context.Products.Any(e => e.Id == id);
         }
     }
 }

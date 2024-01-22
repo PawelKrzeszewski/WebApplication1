@@ -57,6 +57,7 @@ namespace WebApplication1.Controllers
 
                 user.UserName = model.UserName;
                 user.Email = model.Email;
+                user.PhoneNumber = model.PhoneNumber;
 
                 var result = await _userManager.UpdateAsync(user);
 

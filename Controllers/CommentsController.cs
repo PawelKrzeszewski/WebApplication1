@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -70,7 +71,7 @@ namespace WebApplication1.Controllers
 
             var comment = await _context.Comments
                 .Include(c => c.Product)
-                .FirstOrDefaultAsync(m => m.CommentID == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (comment == null)
             {
                 return NotFound();
@@ -80,6 +81,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Comments/Create
+        [Authorize]
         public IActionResult Create()
         {
             ViewData["ProductID"] = new SelectList(_context.Products, "ProductID", "ProductID");
@@ -91,9 +93,8 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CommentID,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
+        public async Task<IActionResult> Create([Bind("Id,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
         {
-            comment.CommentID = _context.Comments.OrderBy(m => m.CommentID).Last().CommentID + 1;
             comment.DateCreated = DateTime.Now;
             comment.CreatorID = User.Identity.Name;
 
@@ -104,7 +105,6 @@ namespace WebApplication1.Controllers
             else
             {
                 ModelState["CreatorID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
-                ModelState["CommentID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
                 ModelState["DateCreated"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
                 if (ModelState.IsValid)
                 {
@@ -118,6 +118,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Comments/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -139,9 +140,9 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CommentID,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Description,DateCreated,IsDeleted,ProductID,CreatorID")] Comment comment)
         {
-            if (id != comment.CommentID)
+            if (id != comment.Id)
             {
                 return NotFound();
             }
@@ -155,7 +156,7 @@ namespace WebApplication1.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CommentExists(comment.CommentID))
+                    if (!CommentExists(comment.Id))
                     {
                         return NotFound();
                     }
@@ -171,6 +172,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Comments/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -180,7 +182,7 @@ namespace WebApplication1.Controllers
 
             var comment = await _context.Comments
                 .Include(c => c.Product)
-                .FirstOrDefaultAsync(m => m.CommentID == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (comment == null)
             {
                 return NotFound();
@@ -206,7 +208,7 @@ namespace WebApplication1.Controllers
 
         private bool CommentExists(int id)
         {
-            return _context.Comments.Any(e => e.CommentID == id);
+            return _context.Comments.Any(e => e.Id == id);
         }
     }
 }

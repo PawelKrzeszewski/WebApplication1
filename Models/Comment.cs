@@ -5,7 +5,7 @@ namespace WebApplication1.Models
 {
     public class Comment
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)] public int CommentID { get; set; }
+        public int Id { get; set; }
 
         public string? Description { get; set; }
 

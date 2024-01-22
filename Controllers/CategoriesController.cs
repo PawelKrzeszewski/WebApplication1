@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -42,7 +43,7 @@ namespace WebApplication1.Controllers
             {
                 categories = categories.Where(s => s.Name.Contains(searchString));
             }
-
+            //enum
             switch (sortOrder)
             {
                 case "name_desc":
@@ -67,7 +68,7 @@ namespace WebApplication1.Controllers
             }
 
             var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.CategoryID == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (category == null)
             {
                 return NotFound();
@@ -77,6 +78,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Categories/Create
+        [Authorize]
         public IActionResult Create()
         {
             return View();
@@ -87,16 +89,14 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("CategoryID,Name,IsDeleted")] Category category)
+        public async Task<IActionResult> Create([Bind("Id,Name,IsDeleted")] Category category)
         {
-            category.CategoryID = _context.Categories.OrderBy(m => m.CategoryID).Last().CategoryID + 1;
             if (User.Identity.Name == null)
             {
                 return View(category);
             }
             else
             {
-                ModelState["CategoryID"].ValidationState = Microsoft.AspNetCore.Mvc.ModelBinding.ModelValidationState.Valid;
                 if (ModelState.IsValid)
                 {
                     _context.Add(category);
@@ -108,6 +108,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Categories/Edit/5
+        [Authorize]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -128,9 +129,9 @@ namespace WebApplication1.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("CategoryID,Name,IsDeleted")] Category category)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,IsDeleted")] Category category)
         {
-            if (id != category.CategoryID)
+            if (id != category.Id)
             {
                 return NotFound();
             }
@@ -144,7 +145,8 @@ namespace WebApplication1.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(category.CategoryID))
+                    if (!CategoryExists(category.
+         Id))
                     {
                         return NotFound();
                     }
@@ -159,6 +161,7 @@ namespace WebApplication1.Controllers
         }
 
         // GET: Categories/Delete/5
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -167,7 +170,7 @@ namespace WebApplication1.Controllers
             }
 
             var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.CategoryID == id);
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (category == null)
             {
                 return NotFound();
@@ -193,7 +196,7 @@ namespace WebApplication1.Controllers
 
         private bool CategoryExists(int id)
         {
-            return _context.Categories.Any(e => e.CategoryID == id);
+            return _context.Categories.Any(e => e.Id == id);
         }
     }
 }

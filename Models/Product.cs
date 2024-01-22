@@ -10,7 +10,7 @@ namespace WebApplication1.Models
 {
     public class Product
     {
-        [DatabaseGenerated(DatabaseGeneratedOption.None)] public int ProductID { get; set;}
+        public int Id { get; set;}
 
         public string? Name { get; set;}
 

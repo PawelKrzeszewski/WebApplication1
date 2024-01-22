@@ -27,6 +27,11 @@
             </div>
 
             <div class="form-group">
+                <label asp-for="PhoneNumber">Phone number:</label>
+                <input asp-for="PhoneNumber" class="form-control" />
+            </div>
+
+            <div class="form-group">
                 <label for="SelectedRoles">Roles:</label>
                 <select asp-for="@SelectedRoles" asp-items="@(new SelectList(availableRoles))" class="form-control" multiple>
                 </select>
