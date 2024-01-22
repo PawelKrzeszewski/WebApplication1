@@ -3,6 +3,7 @@
 @{
     ViewData["Title"] = "Edit";
     var availableRoles = ViewData["AvailableRoles"] as List<string>;
+    List<string> SelectedRoles = new List<string>();
 }
 
 <h1>Edit</h1>
@@ -26,8 +27,8 @@
             </div>
 
             <div class="form-group">
-                <label for="@availableRoles">Roles:</label>
-                <select asp-for="@availableRoles" asp-items="@(new SelectList(availableRoles))" class="form-control" multiple>
+                <label for="SelectedRoles">Roles:</label>
+                <select asp-for="@SelectedRoles" asp-items="@(new SelectList(availableRoles))" class="form-control" multiple>
                 </select>
             </div>
             <div class="form-group">

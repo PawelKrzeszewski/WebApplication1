@@ -43,7 +43,8 @@ namespace WebApplication1.Controllers
 
 
         [HttpPost]
-        public async Task<IActionResult> Edit(IdentityUser model)
+        public async Task<IActionResult> Edit(IdentityUser model, List<string> SelectedRoles)
+            //Nie można zmieniać na admina
         {
             if (ModelState.IsValid)
             {
@@ -76,8 +77,7 @@ namespace WebApplication1.Controllers
                 }
 
                 // Dodaj nowe role użytkownika
-                var newRoles = await _userManager.GetRolesAsync(user);
-                var addRolesResult = await _userManager.AddToRolesAsync(user, newRoles);
+                var addRolesResult = await _userManager.AddToRolesAsync(user, SelectedRoles);
 
                 if (!addRolesResult.Succeeded)
                 {
